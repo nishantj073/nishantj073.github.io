@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Lab 3: GeoJSON data feed.</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css?family=Cormorant+Garamond" rel="stylesheet">
+    <style>
+        html {
+            height: 100%
+        }
+
+        body {
+            height: 90%;
+        }
+
+        #map {
+            height: 45%
+        }
+
+        #header {
+            margin-left: 100px;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        #headerinfo {
+            margin-left: 100px;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .general {
+            margin-left: 10px;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        #windy {
+            width: 100%;
+            height: 100%;
+        }
+
+        #windymap {
+            width: 100%;
+            height: 45%;
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+    <script src="leaflet-providers.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://api4.windy.com/assets/libBoot.js"></script>
+    <script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+    <style>
+    </style>
+</head>
+
+<body>
+
+
+    <div id="text">
+        <img src="uw.png" alt="UW Logo" width="90" height="80" style="float: left;">
+        <h2 id="header">Recent Earthquakes around the world.</h2>
+        <hr />
+        <p id="headerinfo"><strong>This map shows the most significant earthquakes around the world in the last month.</strong></p>
+    </div>
+
+    <div id="map"></div>
+    <h2 class="general">Live Weather Data.</h2>
+    <hr />
+    <p class="general"><strong>This map shows the live weather data around the world in the last month. Click on the
+            top right icon to toggle between Wind, Rain & Thunder, Temperature, Clouds, Waves, Currents and Pressure.
+            You can also click the play button at the bottom of the map to see a forecast for the next couple of days.</strong></p>
+    <div id="windymap">
+        <div id="windy"></div>
+    </div>
+    <script>
+        // initialize the map
+        var map = L.map('map').setView([30, 0], 3);
+
+        var Esri_WorldTerrain = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 20
+        });
+        Esri_WorldTerrain.addTo(map);
+
+        function addDataToMap(data, map) {
+            var dataLayer = L.geoJson(data, {
+                onEachFeature: function (feature, layer) {
+                    var popupText = "Magnitude: " + feature.properties.mag
+                        + "<br>Location: " + feature.properties.place
+                        + "<br><a href='" + feature.properties.url + "'>More info</a>";
+                    layer.bindPopup(popupText);
+                }
+            });
+            dataLayer.addTo(map);
+        }
+
+        $.getJSON("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson", function (data) { addDataToMap(data, map); });
+
+        const options = {
+
+            // Required: API key
+            key: 'UTK6yQ3kAs02Ul2w7v8PsIa2iVQIjsRD',
+
+            // Put additional console output
+            verbose: true,
+
+            // Optional: Initial state of the map
+            lat: 47.2466,
+            lon: -122.438923,
+            zoom: 8,
+
+            timestamp: Date.now() + 3 * 24 * 60 * 60 * 1000,
+
+            hourFormat: '12h',
+        }
+
+        // Initialize Windy API
+        windyInit(options, windyAPI => {
+            // windyAPI is ready, and contain 'map', 'store',
+            // 'picker' and other usefull stuff
+
+            const { map } = windyAPI
+            // .map is instance of Leaflet map
+
+            L.popup()
+                .setLatLng([47.2466, -122.438923])
+                .setContent("Hi Matt :D")
+                .openOn(map);
+
+        })
+    </script>
+</body>
+
+</html>
